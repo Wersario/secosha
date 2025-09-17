@@ -40,6 +40,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        // Ensure user profile exists after sign-in
+        if (session?.user) {
+          const userId = session.user.id;
+          const { data: existing } = await supabase
+            .from('user_profiles')
+            .select('id')
+            .eq('id', userId)
+            .single();
+
+          if (!existing) {
+            await supabase
+              .from('user_profiles')
+              .insert({
+                id: userId,
+                full_name: session.user.user_metadata?.full_name || '',
+                email: session.user.email || '',
+              });
+          }
+        }
         setLoading(false);
       }
     );

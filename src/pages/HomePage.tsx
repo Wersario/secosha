@@ -74,13 +74,7 @@ const HomePage: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('clothing_items')
-        .select(`
-          *,
-          user_profiles (
-            full_name,
-            location
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
