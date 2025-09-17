@@ -29,7 +29,7 @@ const ClothingCard: React.FC<ClothingCardProps> = ({ item, onClick }) => {
 
   return (
     <div
-      className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer transform hover:scale-[1.02]"
+      className="card card-hover overflow-hidden cursor-pointer animate-fadeInUp group"
       onClick={onClick}
     >
       <div className="aspect-square overflow-hidden bg-gray-100">
@@ -37,7 +37,7 @@ const ClothingCard: React.FC<ClothingCardProps> = ({ item, onClick }) => {
           <img
             src={item.images[0]}
             alt={item.title}
-            className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover image-hover group-hover:scale-110"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
@@ -64,13 +64,13 @@ const ClothingCard: React.FC<ClothingCardProps> = ({ item, onClick }) => {
         </p>
         
         <div className="flex flex-wrap gap-2 mb-3">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+          <span className="badge badge-blue">
             {item.category}
           </span>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+          <span className="badge badge-emerald">
             Size {item.size}
           </span>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+          <span className="badge badge-amber">
             {item.condition}
           </span>
         </div>

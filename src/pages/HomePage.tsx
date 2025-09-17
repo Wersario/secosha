@@ -110,11 +110,11 @@ const HomePage: React.FC = () => {
   if (loading) {
     return (
       <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
+        <div className="animate-fadeIn">
+          <div className="h-8 shimmer rounded w-1/4 mb-6"></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="bg-gray-200 rounded-xl h-80"></div>
+              <div key={i} className={`shimmer rounded-xl h-80 stagger-${(i % 8) + 1}`}></div>
             ))}
           </div>
         </div>
@@ -125,7 +125,7 @@ const HomePage: React.FC = () => {
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Browse Items</h1>
+        <h1 className="text-3xl font-bold gradient-text mb-6 animate-fadeInUp">Browse Items</h1>
         
         {/* Search and Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -136,15 +136,15 @@ const HomePage: React.FC = () => {
               placeholder="Search for items..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input-field pl-10 pr-4 py-3 focus-ring"
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center px-6 py-3 rounded-lg font-medium transition-colors ${
+            className={`flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
               showFilters || hasActiveFilters
-                ? 'bg-blue-600 text-white'
-                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                ? 'btn-primary'
+                : 'btn-secondary'
             }`}
           >
             <Filter className="h-5 w-5 mr-2" />
@@ -159,7 +159,7 @@ const HomePage: React.FC = () => {
 
         {/* Filter Panel */}
         {showFilters && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-6">
+          <div className="card glass-effect p-6 mb-6 animate-slideInRight">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
               {hasActiveFilters && (
@@ -264,12 +264,13 @@ const HomePage: React.FC = () => {
       {/* Items Grid */}
       {filteredItems.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredItems.map((item) => (
-            <ClothingCard
-              key={item.id}
-              item={item}
-              onClick={() => {/* TODO: Navigate to item detail */}}
-            />
+          {filteredItems.map((item, index) => (
+            <div key={item.id} className={`animate-fadeInUp stagger-${(index % 8) + 1}`}>
+              <ClothingCard
+                item={item}
+                onClick={() => {/* TODO: Navigate to item detail */}}
+              />
+            </div>
           ))}
         </div>
       ) : (

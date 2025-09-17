@@ -39,9 +39,9 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-emerald-50 flex items-center justify-center p-4">
+    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-soft overflow-hidden animate-fadeInUp">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-emerald-600 px-8 py-12 text-center">
             <h1 className="text-3xl font-bold text-white mb-2">Secosha</h1>
@@ -65,7 +65,7 @@ const AuthPage: React.FC = () => {
                       required
                       value={formData.fullName}
                       onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
-                      className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="input-field pl-10 pr-4 py-3 focus-ring"
                       placeholder="Enter your full name"
                     />
                   </div>
@@ -83,7 +83,7 @@ const AuthPage: React.FC = () => {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-field pl-10 pr-4 py-3 focus-ring"
                     placeholder="Enter your email"
                   />
                 </div>
@@ -100,7 +100,7 @@ const AuthPage: React.FC = () => {
                     required
                     value={formData.password}
                     onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-field pl-10 pr-12 py-3 focus-ring"
                     placeholder="Enter your password"
                     minLength={6}
                   />
@@ -120,7 +120,7 @@ const AuthPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 text-white py-3 rounded-lg hover:from-blue-700 hover:to-emerald-700 transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
               </button>
@@ -143,7 +143,7 @@ const AuthPage: React.FC = () => {
         </div>
 
         {/* Demo Info */}
-        <div className="mt-6 bg-white/70 backdrop-blur rounded-xl p-4 text-center text-sm text-gray-600">
+        <div className="mt-6 glass-effect rounded-xl p-4 text-center text-sm text-gray-600 animate-fadeIn">
           <p className="font-medium mb-2">Demo Version</p>
           <p>This is a demonstration of the Secosha marketplace. To connect to a real database, click "Connect to Supabase" in the top right.</p>
         </div>
