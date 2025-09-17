@@ -33,37 +33,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+    }).catch((error) => {
+      console.error('Error getting session:', error);
+      setLoading(false);
     });
+
+    // Fallback timeout to prevent infinite loading
+    const timeout = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        // Ensure user profile exists after sign-in
-        if (session?.user) {
-          const userId = session.user.id;
-          const { data: existing } = await supabase
-            .from('user_profiles')
-            .select('id')
-            .eq('id', userId)
-            .single();
-
-          if (!existing) {
-            await supabase
+        
+        // Ensure user profile exists after sign-in (non-blocking)
+        if (session?.user && event === 'SIGNED_IN') {
+          try {
+            const userId = session.user.id;
+            const { data: existing } = await supabase
               .from('user_profiles')
-              .insert({
-                id: userId,
-                full_name: session.user.user_metadata?.full_name || '',
-                email: session.user.email || '',
-              });
+              .select('id')
+              .eq('id', userId)
+              .single();
+
+            if (!existing) {
+              await supabase
+                .from('user_profiles')
+                .insert({
+                  id: userId,
+                  full_name: session.user.user_metadata?.full_name || '',
+                  email: session.user.email || '',
+                });
+            }
+          } catch (error) {
+            console.error('Error creating user profile:', error);
+            // Don't block auth flow if profile creation fails
           }
         }
+        
         setLoading(false);
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
