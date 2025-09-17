@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User, MapPin, Package, Save, LogOut } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, UserProfile } from '../lib/supabase';
@@ -22,15 +22,8 @@ const SettingsPage: React.FC = () => {
     'International shipping',
   ];
 
-  useEffect(() => {
-    if (user) {
-      fetchProfile();
-    }
-  }, [user]);
-
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
     if (!user) return;
-    
     try {
       const { data, error } = await supabase
         .from('user_profiles')
@@ -38,12 +31,11 @@ const SettingsPage: React.FC = () => {
         .eq('id', user.id)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
-      
+      if (error && (error as any).code !== 'PGRST116') throw error;
+
       if (data) {
         setProfile(data);
       } else {
-        // Create profile if it doesn't exist
         setProfile({
           id: user.id,
           full_name: user.user_metadata?.full_name || '',
@@ -58,7 +50,15 @@ const SettingsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase, user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user, fetchProfile]);
+
+  // moved above and memoized with useCallback
 
   const handleSave = async () => {
     if (!user) return;

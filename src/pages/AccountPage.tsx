@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase, ClothingItem } from '../lib/supabase';
@@ -15,15 +15,8 @@ const AccountPage: React.FC = () => {
     activeItems: 0,
   });
 
-  useEffect(() => {
-    if (user) {
-      fetchUserItems();
-    }
-  }, [user]);
-
-  const fetchUserItems = async () => {
+  const fetchUserItems = useCallback(async () => {
     if (!user) return;
-    
     try {
       const { data, error } = await supabase
         .from('clothing_items')
@@ -38,22 +31,27 @@ const AccountPage: React.FC = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
       const items = data || [];
       setUserItems(items);
-      
-      // Calculate stats
       setStats({
         totalItems: items.length,
         totalValue: items.reduce((sum, item) => sum + item.price, 0),
-        activeItems: items.length, // All items are active for now
+        activeItems: items.length,
       });
     } catch (error) {
       console.error('Error fetching user items:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase, user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchUserItems();
+    }
+  }, [user, fetchUserItems]);
+
+  // moved above and memoized with useCallback
 
   const handleDeleteItem = async (itemId: string) => {
     if (!confirm('Are you sure you want to delete this item?')) return;

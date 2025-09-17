@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { supabase, ClothingItem } from '../lib/supabase';
 import ClothingCard from '../components/ClothingCard';
@@ -27,9 +27,48 @@ const HomePage: React.FC = () => {
     fetchItems();
   }, []);
 
+  const applyFilters = useCallback(() => {
+    let filtered = items;
+
+    if (searchTerm) {
+      filtered = filtered.filter(item =>
+        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (filters.category) {
+      filtered = filtered.filter(item => item.category === filters.category);
+    }
+
+    if (filters.size) {
+      filtered = filtered.filter(item => item.size === filters.size);
+    }
+
+    if (filters.color) {
+      filtered = filtered.filter(item => 
+        item.color.toLowerCase().includes(filters.color.toLowerCase())
+      );
+    }
+
+    if (filters.condition) {
+      filtered = filtered.filter(item => item.condition === filters.condition);
+    }
+
+    if (filters.minPrice) {
+      filtered = filtered.filter(item => item.price >= parseFloat(filters.minPrice));
+    }
+    if (filters.maxPrice) {
+      filtered = filtered.filter(item => item.price <= parseFloat(filters.maxPrice));
+    }
+
+    setFilteredItems(filtered);
+  }, [items, searchTerm, filters]);
+
   useEffect(() => {
     applyFilters();
-  }, [items, searchTerm, filters]);
+  }, [items, searchTerm, filters, applyFilters]);
 
   const fetchItems = async () => {
     try {
