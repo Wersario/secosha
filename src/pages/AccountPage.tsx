@@ -43,7 +43,7 @@ const AccountPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [supabase, user]);
+  }, [user]);
 
   useEffect(() => {
     if (user) {

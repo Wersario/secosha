@@ -31,7 +31,8 @@ const SettingsPage: React.FC = () => {
         .eq('id', user.id)
         .single();
 
-      if (error && (error as any).code !== 'PGRST116') throw error;
+      // PGRST116 = No rows found (not an error for first-time users)
+      if (error && (error as { code?: string }).code !== 'PGRST116') throw error;
 
       if (data) {
         setProfile(data);
@@ -50,7 +51,7 @@ const SettingsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [supabase, user]);
+  }, [user]);
 
   useEffect(() => {
     if (user) {
