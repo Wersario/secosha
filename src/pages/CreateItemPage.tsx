@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Upload, X, ArrowLeft, Save } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 const CreateItemPage: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
@@ -77,6 +79,8 @@ const CreateItemPage: React.FC = () => {
         condition: '',
       });
       setImages([]);
+      // Navigate to browse page so the new item is visible
+      navigate('/');
     } catch (error) {
       console.error('Error creating item:', error);
       alert('Failed to create item. Please try again.');

@@ -142,11 +142,6 @@ const AuthPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Demo Info */}
-        <div className="mt-6 glass-effect rounded-xl p-4 text-center text-sm text-gray-600 animate-fadeIn">
-          <p className="font-medium mb-2">Demo Version</p>
-          <p>This is a demonstration of the Secosha marketplace. To connect to a real database, click "Connect to Supabase" in the top right.</p>
-        </div>
       </div>
     </div>
   );
