@@ -92,50 +92,6 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const applyFilters = () => {
-    let filtered = items;
-
-    // Search term filter
-    if (searchTerm) {
-      filtered = filtered.filter(item =>
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // Category filter
-    if (filters.category) {
-      filtered = filtered.filter(item => item.category === filters.category);
-    }
-
-    // Size filter
-    if (filters.size) {
-      filtered = filtered.filter(item => item.size === filters.size);
-    }
-
-    // Color filter
-    if (filters.color) {
-      filtered = filtered.filter(item => 
-        item.color.toLowerCase().includes(filters.color.toLowerCase())
-      );
-    }
-
-    // Condition filter
-    if (filters.condition) {
-      filtered = filtered.filter(item => item.condition === filters.condition);
-    }
-
-    // Price range filter
-    if (filters.minPrice) {
-      filtered = filtered.filter(item => item.price >= parseFloat(filters.minPrice));
-    }
-    if (filters.maxPrice) {
-      filtered = filtered.filter(item => item.price <= parseFloat(filters.maxPrice));
-    }
-
-    setFilteredItems(filtered);
-  };
 
   const clearFilters = () => {
     setFilters({
