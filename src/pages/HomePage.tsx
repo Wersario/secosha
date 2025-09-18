@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import { supabase, ClothingItem } from '../lib/supabase';
 import ClothingCard from '../components/ClothingCard';
+import ItemModal from '../components/ItemModal';
 
 const HomePage: React.FC = () => {
   const [items, setItems] = useState<ClothingItem[]>([]);
@@ -17,6 +18,7 @@ const HomePage: React.FC = () => {
     minPrice: '',
     maxPrice: '',
   });
+  const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
 
   const categories = ['Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Shoes', 'Accessories'];
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
@@ -262,7 +264,7 @@ const HomePage: React.FC = () => {
             <div key={item.id} className={`animate-fadeInUp stagger-${(index % 8) + 1}`}>
               <ClothingCard
                 item={item}
-                onClick={() => {/* TODO: Navigate to item detail */}}
+                onClick={() => setSelectedItem(item)}
               />
             </div>
           ))}
@@ -282,6 +284,13 @@ const HomePage: React.FC = () => {
         </div>
       )}
     </div>
+  );
+
+  return (
+    <>
+      {content}
+      <ItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+    </>
   );
 };
 
