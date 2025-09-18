@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { X, MapPin, Clock } from 'lucide-react';
+import { X, MapPin, Clock, ShoppingCart } from 'lucide-react';
 import { ClothingItem } from '../lib/supabase';
+import { useCart } from '../contexts/CartContext';
 
 interface ItemModalProps {
   item: ClothingItem | null;
@@ -8,6 +9,7 @@ interface ItemModalProps {
 }
 
 const ItemModal: React.FC<ItemModalProps> = ({ item, onClose }) => {
+  const { addItem } = useCart();
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -81,7 +83,16 @@ const ItemModal: React.FC<ItemModalProps> = ({ item, onClose }) => {
             </div>
 
             <div className="mt-6 flex gap-3">
-              <button className="btn-primary">Contact Seller</button>
+              <button
+                className="btn-primary flex items-center"
+                onClick={() => {
+                  if (item) {
+                    addItem({ id: item.id, title: item.title, price: item.price, image: item.images?.[0] });
+                  }
+                }}
+              >
+                <ShoppingCart className="h-5 w-5 mr-2" /> Add to Cart
+              </button>
               <button className="btn-secondary" onClick={onClose}>Close</button>
             </div>
           </div>

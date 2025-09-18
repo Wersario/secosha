@@ -7,6 +7,8 @@ import AccountPage from './pages/AccountPage';
 import SettingsPage from './pages/SettingsPage';
 import CreateItemPage from './pages/CreateItemPage';
 import AuthPage from './pages/AuthPage';
+import CartPage from './pages/CartPage';
+import { CartProvider } from './contexts/CartContext';
 
 const AppRoutes: React.FC = () => {
   const { user, loading } = useAuth();
@@ -46,9 +48,17 @@ const AppRoutes: React.FC = () => {
 function App() {
   return (
     <AuthProvider>
-      <Router basename={import.meta.env.BASE_URL}>
-        <AppRoutes />
-      </Router>
+      <CartProvider>
+        <Router basename={import.meta.env.BASE_URL}>
+          <Routes>
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/cart" element={<Layout />}>
+              <Route index element={<CartPage />} />
+            </Route>
+          </Routes>
+          <AppRoutes />
+        </Router>
+      </CartProvider>
     </AuthProvider>
   );
 }
