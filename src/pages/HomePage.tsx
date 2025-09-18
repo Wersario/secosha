@@ -9,6 +9,7 @@ const HomePage: React.FC = () => {
   const [filteredItems, setFilteredItems] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     category: '',
@@ -18,6 +19,7 @@ const HomePage: React.FC = () => {
     minPrice: '',
     maxPrice: '',
   });
+  const [sortBy, setSortBy] = useState<'newest' | 'price_asc' | 'price_desc'>('newest');
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
 
   const categories = ['Tops', 'Bottoms', 'Dresses', 'Outerwear', 'Shoes', 'Accessories'];
@@ -29,48 +31,51 @@ const HomePage: React.FC = () => {
     fetchItems();
   }, []);
 
-  const applyFilters = useCallback(() => {
-    let filtered = items;
-
-    if (searchTerm) {
-      filtered = filtered.filter(item =>
-        item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (filters.category) {
-      filtered = filtered.filter(item => item.category === filters.category);
-    }
-
-    if (filters.size) {
-      filtered = filtered.filter(item => item.size === filters.size);
-    }
-
-    if (filters.color) {
-      filtered = filtered.filter(item => 
-        item.color.toLowerCase().includes(filters.color.toLowerCase())
-      );
-    }
-
-    if (filters.condition) {
-      filtered = filtered.filter(item => item.condition === filters.condition);
-    }
-
-    if (filters.minPrice) {
-      filtered = filtered.filter(item => item.price >= parseFloat(filters.minPrice));
-    }
-    if (filters.maxPrice) {
-      filtered = filtered.filter(item => item.price <= parseFloat(filters.maxPrice));
-    }
-
-    setFilteredItems(filtered);
-  }, [items, searchTerm, filters]);
-
+  // Debounce search to limit requests
   useEffect(() => {
-    applyFilters();
-  }, [items, searchTerm, filters, applyFilters]);
+    const t = setTimeout(() => setDebouncedSearch(searchTerm.trim()), 300);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
+  // Fetch items with server-side filters and sorting
+  useEffect(() => {
+    const fetchFiltered = async () => {
+      setLoading(true);
+      try {
+        let query = supabase
+          .from('clothing_items')
+          .select('*');
+
+        // Search across title, description, category
+        if (debouncedSearch) {
+          const s = debouncedSearch.replace(/'/g, "\\'");
+          query = query.or(`title.ilike.%${s}%,description.ilike.%${s}%,category.ilike.%${s}%`);
+        }
+
+        if (filters.category) query = query.eq('category', filters.category);
+        if (filters.size) query = query.eq('size', filters.size);
+        if (filters.condition) query = query.eq('condition', filters.condition);
+        if (filters.color) query = query.ilike('color', `%${filters.color}%`);
+        if (filters.minPrice) query = query.gte('price', parseFloat(filters.minPrice));
+        if (filters.maxPrice) query = query.lte('price', parseFloat(filters.maxPrice));
+
+        if (sortBy === 'newest') query = query.order('created_at', { ascending: false });
+        if (sortBy === 'price_asc') query = query.order('price', { ascending: true });
+        if (sortBy === 'price_desc') query = query.order('price', { ascending: false });
+
+        const { data, error } = await query;
+        if (error) throw error;
+        setItems(data || []);
+        setFilteredItems(data || []);
+      } catch (err) {
+        console.error('Error filtering items:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFiltered();
+  }, [debouncedSearch, filters, sortBy]);
 
   const fetchItems = async () => {
     try {
@@ -136,6 +141,18 @@ const HomePage: React.FC = () => {
               className="input-field pl-10 pr-4 py-3 focus-ring"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as any)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="newest">Newest</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+            </select>
+          </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
@@ -153,6 +170,42 @@ const HomePage: React.FC = () => {
             )}
           </button>
         </div>
+
+        {/* Active filter chips */}
+        {(hasActiveFilters) && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {filters.category && (
+              <button className="badge badge-blue" onClick={() => setFilters(prev => ({ ...prev, category: '' }))}>
+                Category: {filters.category} <span className="ml-1">×</span>
+              </button>
+            )}
+            {filters.size && (
+              <button className="badge badge-emerald" onClick={() => setFilters(prev => ({ ...prev, size: '' }))}>
+                Size: {filters.size} <span className="ml-1">×</span>
+              </button>
+            )}
+            {filters.condition && (
+              <button className="badge badge-amber" onClick={() => setFilters(prev => ({ ...prev, condition: '' }))}>
+                Condition: {filters.condition} <span className="ml-1">×</span>
+              </button>
+            )}
+            {filters.color && (
+              <button className="badge" onClick={() => setFilters(prev => ({ ...prev, color: '' }))}>
+                Color: {filters.color} <span className="ml-1">×</span>
+              </button>
+            )}
+            {(filters.minPrice || filters.maxPrice) && (
+              <button className="badge" onClick={() => setFilters(prev => ({ ...prev, minPrice: '', maxPrice: '' }))}>
+                Price: {filters.minPrice || 0} - {filters.maxPrice || '∞'} <span className="ml-1">×</span>
+              </button>
+            )}
+            {searchTerm && (
+              <button className="badge" onClick={() => setSearchTerm('')}>
+                Search: {searchTerm} <span className="ml-1">×</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Filter Panel */}
         {showFilters && (
