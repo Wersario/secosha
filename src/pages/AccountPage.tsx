@@ -20,13 +20,7 @@ const AccountPage: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('clothing_items')
-        .select(`
-          *,
-          user_profiles (
-            full_name,
-            location
-          )
-        `)
+        .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 

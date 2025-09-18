@@ -119,6 +119,7 @@ const HomePage: React.FC = () => {
   }
 
   return (
+    <>
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold gradient-text mb-6 animate-fadeInUp">Browse Items</h1>
@@ -284,12 +285,7 @@ const HomePage: React.FC = () => {
         </div>
       )}
     </div>
-  );
-
-  return (
-    <>
-      {content}
-      <ItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
+    <ItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
     </>
   );
 };

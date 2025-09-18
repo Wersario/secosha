@@ -79,8 +79,8 @@ const CreateItemPage: React.FC = () => {
         condition: '',
       });
       setImages([]);
-      // Navigate to browse page so the new item is visible
-      navigate('/');
+      // Navigate to account page so the new item is visible under "Your Items"
+      navigate('/account');
     } catch (error) {
       console.error('Error creating item:', error);
       alert('Failed to create item. Please try again.');
