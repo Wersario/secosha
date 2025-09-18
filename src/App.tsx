@@ -39,6 +39,7 @@ const AppRoutes: React.FC = () => {
         <Route path="account" element={<AccountPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="create" element={<CreateItemPage />} />
+        <Route path="cart" element={<CartPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -50,12 +51,6 @@ function App() {
     <AuthProvider>
       <CartProvider>
         <Router basename={import.meta.env.BASE_URL}>
-          <Routes>
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/cart" element={<Layout />}>
-              <Route index element={<CartPage />} />
-            </Route>
-          </Routes>
           <AppRoutes />
         </Router>
       </CartProvider>
