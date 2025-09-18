@@ -8,6 +8,7 @@ const HomePage: React.FC = () => {
   const [items, setItems] = useState<ClothingItem[]>([]);
   const [filteredItems, setFilteredItems] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -27,9 +28,7 @@ const HomePage: React.FC = () => {
   const colors = ['Black', 'White', 'Gray', 'Navy', 'Brown', 'Red', 'Blue', 'Green', 'Pink', 'Beige'];
   const conditions = ['New with tags', 'Like new', 'Good', 'Fair'];
 
-  useEffect(() => {
-    fetchItems();
-  }, []);
+  // Initial load happens via filtered fetch below
 
   // Debounce search to limit requests
   useEffect(() => {
@@ -37,14 +36,23 @@ const HomePage: React.FC = () => {
     return () => clearTimeout(t);
   }, [searchTerm]);
 
-  // Fetch items with server-side filters and sorting
+  // Fetch items with server-side filters and sorting (with timeout)
   useEffect(() => {
+    let timedOut = false;
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      setError('Request timed out. Please try again.');
+      setLoading(false);
+    }, 8000);
+
     const fetchFiltered = async () => {
       setLoading(true);
+      setError(null);
       try {
         let query = supabase
           .from('clothing_items')
-          .select('*');
+          .select('*')
+          .limit(48);
 
         // Search across title, description, category
         if (debouncedSearch) {
@@ -68,13 +76,20 @@ const HomePage: React.FC = () => {
         setItems(data || []);
         setFilteredItems(data || []);
       } catch (err) {
-        console.error('Error filtering items:', err);
+        if (!timedOut) {
+          console.error('Error filtering items:', err);
+          setError('Failed to load items.');
+        }
       } finally {
-        setLoading(false);
+        if (!timedOut) {
+          clearTimeout(timeoutId);
+          setLoading(false);
+        }
       }
     };
 
     fetchFiltered();
+    return () => clearTimeout(timeoutId);
   }, [debouncedSearch, filters, sortBy]);
 
   const fetchItems = async () => {
@@ -118,6 +133,9 @@ const HomePage: React.FC = () => {
               <div key={i} className={`shimmer rounded-xl h-80 stagger-${(i % 8) + 1}`}></div>
             ))}
           </div>
+          {error && (
+            <p className="text-red-600 mt-4">{error}</p>
+          )}
         </div>
       </div>
     );
