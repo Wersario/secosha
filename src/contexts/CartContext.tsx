@@ -1,5 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { ClothingItem } from '../lib/supabase';
 
 export type CartItem = {
   id: string;
