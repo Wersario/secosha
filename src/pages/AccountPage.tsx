@@ -9,6 +9,7 @@ const AccountPage: React.FC = () => {
   const { user } = useAuth();
   const [userItems, setUserItems] = useState<ClothingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState({
     totalItems: 0,
     totalValue: 0,
@@ -34,18 +35,32 @@ const AccountPage: React.FC = () => {
       });
     } catch (error) {
       console.error('Error fetching user items:', error);
+      setError('Failed to load your items.');
     } finally {
       setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      fetchUserItems();
+    if (!user) {
+      setLoading(false);
+      return;
     }
-  }, [user, fetchUserItems]);
+    let timedOut = false;
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      setError('Request timed out. Please try again.');
+      setLoading(false);
+    }, 8000);
 
-  // moved above and memoized with useCallback
+    fetchUserItems().finally(() => {
+      if (!timedOut) {
+        clearTimeout(timeoutId);
+      }
+    });
+
+    return () => clearTimeout(timeoutId);
+  }, [user, fetchUserItems]);
 
   const handleDeleteItem = async (itemId: string) => {
     if (!confirm('Are you sure you want to delete this item?')) return;
@@ -80,6 +95,9 @@ const AccountPage: React.FC = () => {
               <div key={i} className="bg-gray-200 rounded-xl h-80"></div>
             ))}
           </div>
+          {error && (
+            <p className="text-red-600 mt-4">{error}</p>
+          )}
         </div>
       </div>
     );

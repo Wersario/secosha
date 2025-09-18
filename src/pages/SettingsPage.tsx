@@ -14,6 +14,7 @@ const SettingsPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const deliveryOptions = [
     'Local pickup',
@@ -48,18 +49,32 @@ const SettingsPage: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching profile:', error);
+      setError('Failed to load profile.');
     } finally {
       setLoading(false);
     }
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      fetchProfile();
+    if (!user) {
+      setLoading(false);
+      return;
     }
-  }, [user, fetchProfile]);
+    let timedOut = false;
+    const timeoutId = setTimeout(() => {
+      timedOut = true;
+      setError('Request timed out. Please try again.');
+      setLoading(false);
+    }, 8000);
 
-  // moved above and memoized with useCallback
+    fetchProfile().finally(() => {
+      if (!timedOut) {
+        clearTimeout(timeoutId);
+      }
+    });
+
+    return () => clearTimeout(timeoutId);
+  }, [user, fetchProfile]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -119,6 +134,9 @@ const SettingsPage: React.FC = () => {
             <div className="h-32 bg-gray-200 rounded-xl"></div>
             <div className="h-32 bg-gray-200 rounded-xl"></div>
           </div>
+          {error && (
+            <p className="text-red-600 mt-4">{error}</p>
+          )}
         </div>
       </div>
     );
