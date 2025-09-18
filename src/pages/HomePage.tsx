@@ -92,21 +92,6 @@ const HomePage: React.FC = () => {
     return () => clearTimeout(timeoutId);
   }, [debouncedSearch, filters, sortBy]);
 
-  const fetchItems = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('clothing_items')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setItems(data || []);
-    } catch (error) {
-      console.error('Error fetching items:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
 
   const clearFilters = () => {
