@@ -39,15 +39,34 @@ const CreateItemPage: React.FC = () => {
       return;
     }
 
+    console.log('Starting upload for', toUpload.length, 'files');
     setUploading(true);
+    
     try {
+      // First, let's check if the bucket exists and is accessible
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      console.log('Available buckets:', buckets);
+      
+      if (bucketError) {
+        throw new Error(`Bucket access error: ${bucketError.message}`);
+      }
+
+      const itemImagesBucket = buckets?.find(b => b.name === 'item-images');
+      if (!itemImagesBucket) {
+        throw new Error('item-images bucket not found. Please create it in Supabase Storage.');
+      }
+
       const uploadedUrls: string[] = [];
       for (const file of toUpload) {
+        console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type);
+        
         const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
         const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
         const filePath = `${user.id}/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
+        console.log('Uploading to path:', filePath);
+
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('item-images')
           .upload(filePath, file, {
             cacheControl: '3600',
@@ -55,25 +74,38 @@ const CreateItemPage: React.FC = () => {
             contentType: file.type || 'image/*',
           });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error for', file.name, ':', uploadError);
+          throw new Error(`Upload failed for ${file.name}: ${uploadError.message}`);
+        }
 
-        const { data } = supabase.storage
+        console.log('Upload successful for', file.name, ':', uploadData);
+
+        const { data: publicUrlData } = supabase.storage
           .from('item-images')
           .getPublicUrl(filePath);
 
-        if (data?.publicUrl) {
-          uploadedUrls.push(data.publicUrl);
+        console.log('Public URL data:', publicUrlData);
+
+        if (publicUrlData?.publicUrl) {
+          uploadedUrls.push(publicUrlData.publicUrl);
+          console.log('Added URL:', publicUrlData.publicUrl);
+        } else {
+          console.warn('No public URL generated for', file.name);
         }
       }
 
       if (uploadedUrls.length > 0) {
         setImages(prev => [...prev, ...uploadedUrls].slice(0, 5));
-        alert('Images uploaded successfully.');
+        console.log('All uploads successful. New images:', uploadedUrls);
+        alert(`Successfully uploaded ${uploadedUrls.length} image(s).`);
+      } else {
+        throw new Error('No images were successfully uploaded.');
       }
     } catch (err) {
       console.error('Image upload failed:', err);
-      const message = err instanceof Error ? err.message : 'Image upload failed. Please check your connection and bucket configuration (item-images).';
-      alert(message);
+      const message = err instanceof Error ? err.message : 'Image upload failed. Please check your connection and bucket configuration.';
+      alert(`Upload failed: ${message}`);
     } finally {
       setUploading(false);
       // reset the input so the same file can be selected again if needed
@@ -87,11 +119,31 @@ const CreateItemPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      alert('You must be signed in to create an item.');
+      return;
+    }
+
+    if (images.length === 0) {
+      alert('Please upload at least one image.');
+      return;
+    }
+
+    console.log('Creating item with data:', {
+      user_id: user.id,
+      title: formData.title,
+      description: formData.description,
+      price: parseFloat(formData.price),
+      size: formData.size,
+      color: formData.color,
+      category: formData.category,
+      condition: formData.condition,
+      images: images,
+    });
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('clothing_items')
         .insert({
           user_id: user.id,
@@ -103,11 +155,17 @@ const CreateItemPage: React.FC = () => {
           category: formData.category,
           condition: formData.condition,
           images: images,
-        });
+        })
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw new Error(`Database error: ${error.message}`);
+      }
 
+      console.log('Item created successfully:', data);
       alert('Item created successfully!');
+      
       // Reset form
       setFormData({
         title: '',
@@ -119,11 +177,11 @@ const CreateItemPage: React.FC = () => {
         condition: '',
       });
       setImages([]);
-      // Navigate to account page so the new item is visible under "Your Items"
       navigate('/account');
     } catch (error) {
       console.error('Error creating item:', error);
-      alert('Failed to create item. Please try again.');
+      const message = error instanceof Error ? error.message : 'Failed to create item. Please try again.';
+      alert(`Creation failed: ${message}`);
     } finally {
       setLoading(false);
     }
