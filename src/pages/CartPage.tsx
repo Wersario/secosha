@@ -29,6 +29,9 @@ const CartPage: React.FC = () => {
                 src={item.image || 'https://via.placeholder.com/80x80?text=No+Image'}
                 alt={item.title}
                 className="w-20 h-20 object-cover rounded mr-4"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = 'https://via.placeholder.com/80x80?text=No+Image';
+                }}
               />
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900">{item.title}</h3>

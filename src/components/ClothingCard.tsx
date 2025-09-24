@@ -38,6 +38,9 @@ const ClothingCard: React.FC<ClothingCardProps> = ({ item, onClick }) => {
             src={item.images[0]}
             alt={item.title}
             className="w-full h-full object-cover image-hover group-hover:scale-110"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = 'https://via.placeholder.com/600x600?text=No+Image';
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">

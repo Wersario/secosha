@@ -48,7 +48,14 @@ const ItemModal: React.FC<ItemModalProps> = ({ item, onClose }) => {
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="bg-gray-100">
             {item.images && item.images.length > 0 ? (
-              <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+              <img
+                src={item.images[0]}
+                alt={item.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = 'https://via.placeholder.com/600x400?text=No+Image';
+                }}
+              />
             ) : (
               <div className="w-full h-full min-h-[300px] flex items-center justify-center text-gray-400">
                 No image

@@ -23,22 +23,52 @@ const CreateItemPage: React.FC = () => {
   const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
   const conditions = ['New with tags', 'Like new', 'Good', 'Fair'];
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files) return;
+    if (!files || files.length === 0 || !user) return;
 
-    // For demo purposes, we'll use placeholder images from Pexels
-    const placeholderImages = [
-      'https://images.pexels.com/photos/996329/pexels-photo-996329.jpeg',
-      'https://images.pexels.com/photos/1036622/pexels-photo-1036622.jpeg',
-      'https://images.pexels.com/photos/1300550/pexels-photo-1300550.jpeg',
-    ];
+    const remaining = Math.max(0, 5 - images.length);
+    const toUpload = Array.from(files).slice(0, remaining);
+    if (toUpload.length === 0) return;
 
-    const newImages = Array.from(files).slice(0, 5).map((_, index) => 
-      placeholderImages[index % placeholderImages.length]
-    );
-    
-    setImages(prev => [...prev, ...newImages].slice(0, 5));
+    setLoading(true);
+    try {
+      const uploadedUrls: string[] = [];
+      for (const file of toUpload) {
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+        const filePath = `${user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('item-images')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false,
+            contentType: file.type || 'image/*',
+          });
+
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage
+          .from('item-images')
+          .getPublicUrl(filePath);
+
+        if (data?.publicUrl) {
+          uploadedUrls.push(data.publicUrl);
+        }
+      }
+
+      if (uploadedUrls.length > 0) {
+        setImages(prev => [...prev, ...uploadedUrls].slice(0, 5));
+      }
+    } catch (err) {
+      console.error('Image upload failed:', err);
+      alert('Image upload failed. Please try again.');
+    } finally {
+      setLoading(false);
+      // reset the input so the same file can be selected again if needed
+      event.target.value = '';
+    }
   };
 
   const removeImage = (index: number) => {
