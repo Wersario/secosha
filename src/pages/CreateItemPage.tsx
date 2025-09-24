@@ -72,7 +72,7 @@ const CreateItemPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Image upload failed:', err);
-      const message = (err as any)?.message || 'Image upload failed. Please check your connection and bucket configuration (item-images).';
+      const message = err instanceof Error ? err.message : 'Image upload failed. Please check your connection and bucket configuration (item-images).';
       alert(message);
     } finally {
       setUploading(false);
