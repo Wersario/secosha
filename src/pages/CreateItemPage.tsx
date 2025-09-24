@@ -8,6 +8,7 @@ const CreateItemPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
@@ -25,13 +26,20 @@ const CreateItemPage: React.FC = () => {
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files || files.length === 0 || !user) return;
+    if (!files || files.length === 0) return;
+    if (!user) {
+      alert('You must be signed in to upload images.');
+      return;
+    }
 
     const remaining = Math.max(0, 5 - images.length);
     const toUpload = Array.from(files).slice(0, remaining);
-    if (toUpload.length === 0) return;
+    if (toUpload.length === 0) {
+      alert('You can upload up to 5 photos. Remove one to add another.');
+      return;
+    }
 
-    setLoading(true);
+    setUploading(true);
     try {
       const uploadedUrls: string[] = [];
       for (const file of toUpload) {
@@ -60,12 +68,14 @@ const CreateItemPage: React.FC = () => {
 
       if (uploadedUrls.length > 0) {
         setImages(prev => [...prev, ...uploadedUrls].slice(0, 5));
+        alert('Images uploaded successfully.');
       }
     } catch (err) {
       console.error('Image upload failed:', err);
-      alert('Image upload failed. Please try again.');
+      const message = (err as any)?.message || 'Image upload failed. Please check your connection and bucket configuration (item-images).';
+      alert(message);
     } finally {
-      setLoading(false);
+      setUploading(false);
       // reset the input so the same file can be selected again if needed
       event.target.value = '';
     }
@@ -164,12 +174,13 @@ const CreateItemPage: React.FC = () => {
             {images.length < 5 && (
               <label className="w-full h-32 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
                 <Upload className="h-6 w-6 text-gray-400 mb-2" />
-                <span className="text-sm text-gray-500">Add Photo</span>
+                <span className="text-sm text-gray-500">{uploading ? 'Uploading...' : 'Add Photo'}</span>
                 <input
                   type="file"
                   multiple
                   accept="image/*"
                   onChange={handleImageUpload}
+                  disabled={uploading}
                   className="hidden"
                 />
               </label>
