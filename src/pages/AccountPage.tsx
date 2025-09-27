@@ -137,8 +137,8 @@ const AccountPage: React.FC = () => {
             {/* Total Value Card */}
             <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
               <div className="flex items-center">
-                <div className="p-2 bg-emerald-500 rounded-lg">
-                  <div className="h-5 w-5 text-white font-bold text-center">$</div>
+                <div className="p-2 bg-emerald-500 rounded-lg flex items-center justify-center">
+                  <div className="h-5 w-5 text-white font-bold flex items-center justify-center">$</div>
                 </div>
                 <div className="ml-3">
                   <p className="text-sm font-medium text-emerald-700">Total Value</p>
