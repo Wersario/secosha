@@ -137,13 +137,13 @@ const HomePage: React.FC = () => {
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search Input */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <input
                 type="text"
                 placeholder="Search for items..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-field pl-10 pr-4 py-3 focus-ring w-full"
+                className="w-full border border-gray-300 rounded-md pl-10 pr-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm h-10"
               />
             </div>
             
@@ -155,7 +155,7 @@ const HomePage: React.FC = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as 'newest' | 'price_asc' | 'price_desc')}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm h-10"
                 >
                   <option value="newest">Newest</option>
                   <option value="price_asc">Price: Low to High</option>
@@ -167,7 +167,7 @@ const HomePage: React.FC = () => {
               <div className="flex items-end">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center px-6 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+                  className={`flex items-center px-6 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap h-10 ${
                     showFilters || hasActiveFilters
                       ? 'btn-primary'
                       : 'btn-secondary'
