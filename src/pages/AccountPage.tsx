@@ -117,42 +117,48 @@ const AccountPage: React.FC = () => {
           </Link>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center">
-              <div className="p-3 bg-blue-100 rounded-full">
-                <Eye className="h-6 w-6 text-blue-600" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Items</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalItems}</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center">
-              <div className="p-3 bg-emerald-100 rounded-full">
-                <div className="h-6 w-6 text-emerald-600 font-bold">$</div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Total Value</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  ${stats.totalValue.toFixed(2)}
-                </p>
+        {/* Stats Block */}
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">Account Statistics</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Total Items Card */}
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+              <div className="flex items-center">
+                <div className="p-2 bg-blue-500 rounded-lg">
+                  <Eye className="h-5 w-5 text-white" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-blue-700">Total Items</p>
+                  <p className="text-xl font-bold text-blue-900">{stats.totalItems}</p>
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="flex items-center">
-              <div className="p-3 bg-amber-100 rounded-full">
-                <div className="h-6 w-6 bg-amber-600 rounded-full"></div>
+            
+            {/* Total Value Card */}
+            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
+              <div className="flex items-center">
+                <div className="p-2 bg-emerald-500 rounded-lg">
+                  <div className="h-5 w-5 text-white font-bold text-center">$</div>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-emerald-700">Total Value</p>
+                  <p className="text-xl font-bold text-emerald-900">
+                    ${stats.totalValue.toFixed(2)}
+                  </p>
+                </div>
               </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Active Items</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeItems}</p>
+            </div>
+            
+            {/* Active Items Card */}
+            <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-4 border border-amber-200">
+              <div className="flex items-center">
+                <div className="p-2 bg-amber-500 rounded-lg">
+                  <div className="h-5 w-5 bg-white rounded-full"></div>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-amber-700">Active Items</p>
+                  <p className="text-xl font-bold text-amber-900">{stats.activeItems}</p>
+                </div>
               </div>
             </div>
           </div>
