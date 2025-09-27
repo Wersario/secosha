@@ -123,24 +123,40 @@ const CreateItemPage: React.FC = () => {
 
     setLoading(true);
     try {
-        const { data, error } = await supabase
-          .from('clothing_items')
-          .insert({
-            user_id: user.id,
-            title: formData.title,
-            description: formData.description,
-            price: parseFloat(formData.price),
-            size: formData.size,
-            color: formData.color,
-            category: formData.category,
-            condition: formData.condition,
-            images: JSON.stringify(images), // Store as JSON string
-          })
-          .select();
+      // First, let's test if we can connect to the database
+      console.log('Testing database connection...');
+      const { data: testData, error: testError } = await supabase
+        .from('clothing_items')
+        .select('id')
+        .limit(1);
+      
+      if (testError) {
+        console.error('Database connection test failed:', testError);
+        throw new Error(`Database connection failed: ${testError.message}`);
+      }
+      
+      console.log('Database connection successful');
+
+      // Now try to insert the item
+      console.log('Inserting item...');
+      const { data, error } = await supabase
+        .from('clothing_items')
+        .insert({
+          user_id: user.id,
+          title: formData.title,
+          description: formData.description,
+          price: parseFloat(formData.price),
+          size: formData.size,
+          color: formData.color,
+          category: formData.category,
+          condition: formData.condition,
+          images: JSON.stringify(images), // Store as JSON string
+        })
+        .select();
 
       if (error) {
-        console.error('Database error:', error);
-        throw new Error(`Database error: ${error.message}`);
+        console.error('Database insert error:', error);
+        throw new Error(`Database insert failed: ${error.message} (Code: ${error.code})`);
       }
 
       console.log('Item created successfully:', data);
