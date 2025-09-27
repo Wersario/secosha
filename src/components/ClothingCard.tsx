@@ -8,6 +8,20 @@ interface ClothingCardProps {
 }
 
 const ClothingCard: React.FC<ClothingCardProps> = ({ item, onClick }) => {
+  // Parse images from JSON string or handle array format
+  const getImages = (): string[] => {
+    if (typeof item.images === 'string') {
+      try {
+        return JSON.parse(item.images);
+      } catch {
+        return [];
+      }
+    }
+    return Array.isArray(item.images) ? item.images : [];
+  };
+
+  const images = getImages();
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -21,6 +35,7 @@ const ClothingCard: React.FC<ClothingCardProps> = ({ item, onClick }) => {
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
+    if (diffDays === 0) return 'Today';
     if (diffDays === 1) return '1 day ago';
     if (diffDays < 7) return `${diffDays} days ago`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
@@ -33,9 +48,9 @@ const ClothingCard: React.FC<ClothingCardProps> = ({ item, onClick }) => {
       onClick={onClick}
     >
       <div className="aspect-square overflow-hidden bg-gray-100">
-        {item.images && item.images.length > 0 ? (
+        {images && images.length > 0 ? (
           <img
-            src={item.images[0]}
+            src={images[0]}
             alt={item.title}
             className="w-full h-full object-cover image-hover group-hover:scale-110"
             onError={(e) => {
@@ -45,7 +60,7 @@ const ClothingCard: React.FC<ClothingCardProps> = ({ item, onClick }) => {
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400">
             <div className="text-center">
-              <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-2"></div>
+              <div className="w-16 h-16 bg-gray-200 rounded-full mx-auto mb-2 flex items-center justify-center text-xl">👕</div>
               <p className="text-sm">No image</p>
             </div>
           </div>

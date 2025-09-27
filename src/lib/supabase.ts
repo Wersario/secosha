@@ -14,7 +14,7 @@ export type ClothingItem = {
   color: string;
   category: string;
   condition: string;
-  images: string[];
+  images: string; // Changed from string[] to string for base64 JSON storage
   user_id: string;
   created_at: string;
   // Joined via select(`user_profiles(...)`)

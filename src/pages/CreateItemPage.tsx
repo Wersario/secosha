@@ -27,10 +27,6 @@ const CreateItemPage: React.FC = () => {
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-    if (!user) {
-      alert('You must be signed in to upload images.');
-      return;
-    }
 
     const remaining = Math.max(0, 5 - images.length);
     const toUpload = Array.from(files).slice(0, remaining);
@@ -39,73 +35,57 @@ const CreateItemPage: React.FC = () => {
       return;
     }
 
-    console.log('Starting upload for', toUpload.length, 'files');
+    console.log('Processing', toUpload.length, 'files for base64 conversion');
     setUploading(true);
     
     try {
-      // First, let's check if the bucket exists and is accessible
-      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
-      console.log('Available buckets:', buckets);
+      const base64Images: string[] = [];
       
-      if (bucketError) {
-        throw new Error(`Bucket access error: ${bucketError.message}`);
-      }
-
-      const itemImagesBucket = buckets?.find(b => b.name === 'item-images');
-      if (!itemImagesBucket) {
-        throw new Error('item-images bucket not found. Please create it in Supabase Storage.');
-      }
-
-      const uploadedUrls: string[] = [];
       for (const file of toUpload) {
-        console.log('Uploading file:', file.name, 'Size:', file.size, 'Type:', file.type);
+        console.log('Processing file:', file.name, 'Size:', file.size, 'Type:', file.type);
         
-        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-        const filePath = `${user.id}/${fileName}`;
-
-        console.log('Uploading to path:', filePath);
-
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('item-images')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: file.type || 'image/*',
-          });
-
-        if (uploadError) {
-          console.error('Upload error for', file.name, ':', uploadError);
-          throw new Error(`Upload failed for ${file.name}: ${uploadError.message}`);
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          alert(`${file.name} is not a valid image file. Please select only image files.`);
+          continue;
         }
 
-        console.log('Upload successful for', file.name, ':', uploadData);
-
-        const { data: publicUrlData } = supabase.storage
-          .from('item-images')
-          .getPublicUrl(filePath);
-
-        console.log('Public URL data:', publicUrlData);
-
-        if (publicUrlData?.publicUrl) {
-          uploadedUrls.push(publicUrlData.publicUrl);
-          console.log('Added URL:', publicUrlData.publicUrl);
-        } else {
-          console.warn('No public URL generated for', file.name);
+        // Validate file size (max 2MB per image)
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSize) {
+          alert(`${file.name} is too large. Please select images smaller than 2MB.`);
+          continue;
         }
+
+        // Convert to base64
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            if (typeof reader.result === 'string') {
+              resolve(reader.result);
+            } else {
+              reject(new Error('Failed to convert file to base64'));
+            }
+          };
+          reader.onerror = () => reject(new Error('Failed to read file'));
+          reader.readAsDataURL(file);
+        });
+
+        base64Images.push(base64);
+        console.log('Converted to base64:', file.name);
       }
 
-      if (uploadedUrls.length > 0) {
-        setImages(prev => [...prev, ...uploadedUrls].slice(0, 5));
-        console.log('All uploads successful. New images:', uploadedUrls);
-        alert(`Successfully uploaded ${uploadedUrls.length} image(s).`);
+      if (base64Images.length > 0) {
+        setImages(prev => [...prev, ...base64Images].slice(0, 5));
+        console.log('All images processed successfully. Total images:', base64Images.length);
+        alert(`Successfully processed ${base64Images.length} image(s).`);
       } else {
-        throw new Error('No images were successfully uploaded.');
+        alert('No valid images were processed. Please select valid image files under 2MB each.');
       }
     } catch (err) {
-      console.error('Image upload failed:', err);
-      const message = err instanceof Error ? err.message : 'Image upload failed. Please check your connection and bucket configuration.';
-      alert(`Upload failed: ${message}`);
+      console.error('Image processing failed:', err);
+      const message = err instanceof Error ? err.message : 'Image processing failed. Please try again.';
+      alert(`Processing failed: ${message}`);
     } finally {
       setUploading(false);
       // reset the input so the same file can be selected again if needed
@@ -143,20 +123,20 @@ const CreateItemPage: React.FC = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('clothing_items')
-        .insert({
-          user_id: user.id,
-          title: formData.title,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          size: formData.size,
-          color: formData.color,
-          category: formData.category,
-          condition: formData.condition,
-          images: images,
-        })
-        .select();
+        const { data, error } = await supabase
+          .from('clothing_items')
+          .insert({
+            user_id: user.id,
+            title: formData.title,
+            description: formData.description,
+            price: parseFloat(formData.price),
+            size: formData.size,
+            color: formData.color,
+            category: formData.category,
+            condition: formData.condition,
+            images: JSON.stringify(images), // Store as JSON string
+          })
+          .select();
 
       if (error) {
         console.error('Database error:', error);
@@ -188,7 +168,7 @@ const CreateItemPage: React.FC = () => {
   };
 
   const isFormValid = formData.title && formData.description && formData.price && 
-                     formData.size && formData.category && formData.condition;
+                     formData.size && formData.category && formData.condition && images.length > 0;
 
   return (
     <div className="p-6 max-w-2xl mx-auto">

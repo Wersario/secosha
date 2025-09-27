@@ -10,6 +10,20 @@ interface ItemModalProps {
 
 const ItemModal: React.FC<ItemModalProps> = ({ item, onClose }) => {
   const { addItem } = useCart();
+  
+  // Parse images from JSON string or handle array format
+  const getImages = (): string[] => {
+    if (!item) return [];
+    if (typeof item.images === 'string') {
+      try {
+        return JSON.parse(item.images);
+      } catch {
+        return [];
+      }
+    }
+    return Array.isArray(item.images) ? item.images : [];
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -19,6 +33,8 @@ const ItemModal: React.FC<ItemModalProps> = ({ item, onClose }) => {
   }, [onClose]);
 
   if (!item) return null;
+
+  const images = getImages();
 
   const formatPrice = (price: number) =>
     new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(price);
@@ -47,9 +63,9 @@ const ItemModal: React.FC<ItemModalProps> = ({ item, onClose }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="bg-gray-100">
-            {item.images && item.images.length > 0 ? (
+            {images && images.length > 0 ? (
               <img
-                src={item.images[0]}
+                src={images[0]}
                 alt={item.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {
