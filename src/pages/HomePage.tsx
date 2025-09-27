@@ -133,92 +133,139 @@ const HomePage: React.FC = () => {
         <h1 className="text-3xl font-bold gradient-text mb-6 animate-fadeInUp">Browse Items</h1>
         
         {/* Search and Filter Bar */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search for items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="input-field pl-10 pr-4 py-3 focus-ring"
-            />
+        <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search Input */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                type="text"
+                placeholder="Search for items..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input-field pl-10 pr-4 py-3 focus-ring w-full"
+              />
+            </div>
+            
+            {/* Sort and Filter Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 lg:gap-3">
+              {/* Sort Dropdown */}
+              <div className="min-w-[180px]">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as 'newest' | 'price_asc' | 'price_desc')}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                >
+                  <option value="newest">Newest</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                </select>
+              </div>
+              
+              {/* Filter Toggle Button */}
+              <div className="flex items-end">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center px-6 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
+                    showFilters || hasActiveFilters
+                      ? 'btn-primary'
+                      : 'btn-secondary'
+                  }`}
+                >
+                  <Filter className="h-5 w-5 mr-2" />
+                  Filters
+                  {hasActiveFilters && (
+                    <span className="ml-2 bg-white text-blue-600 rounded-full px-2 py-0.5 text-xs font-bold">
+                      {Object.values(filters).filter(v => v !== '').length + (searchTerm ? 1 : 0)}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'newest' | 'price_asc' | 'price_desc')}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="newest">Newest</option>
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-            </select>
-          </div>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-              showFilters || hasActiveFilters
-                ? 'btn-primary'
-                : 'btn-secondary'
-            }`}
-          >
-            <Filter className="h-5 w-5 mr-2" />
-            Filters
-            {hasActiveFilters && (
-              <span className="ml-2 bg-white text-blue-600 rounded-full px-2 py-0.5 text-xs font-bold">
-                {Object.values(filters).filter(v => v !== '').length + (searchTerm ? 1 : 0)}
-              </span>
-            )}
-          </button>
         </div>
 
         {/* Active filter chips */}
         {(hasActiveFilters) && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {filters.category && (
-              <button className="badge badge-blue" onClick={() => setFilters(prev => ({ ...prev, category: '' }))}>
-                Category: {filters.category} <span className="ml-1">×</span>
+          <div className="bg-blue-50 rounded-lg p-4 mb-6">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-medium text-gray-700">Active Filters</h4>
+              <button
+                onClick={clearFilters}
+                className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Clear All
               </button>
-            )}
-            {filters.size && (
-              <button className="badge badge-emerald" onClick={() => setFilters(prev => ({ ...prev, size: '' }))}>
-                Size: {filters.size} <span className="ml-1">×</span>
-              </button>
-            )}
-            {filters.condition && (
-              <button className="badge badge-amber" onClick={() => setFilters(prev => ({ ...prev, condition: '' }))}>
-                Condition: {filters.condition} <span className="ml-1">×</span>
-              </button>
-            )}
-            {filters.color && (
-              <button className="badge" onClick={() => setFilters(prev => ({ ...prev, color: '' }))}>
-                Color: {filters.color} <span className="ml-1">×</span>
-              </button>
-            )}
-            {(filters.minPrice || filters.maxPrice) && (
-              <button className="badge" onClick={() => setFilters(prev => ({ ...prev, minPrice: '', maxPrice: '' }))}>
-                Price: {filters.minPrice || 0} - {filters.maxPrice || '∞'} <span className="ml-1">×</span>
-              </button>
-            )}
-            {searchTerm && (
-              <button className="badge" onClick={() => setSearchTerm('')}>
-                Search: {searchTerm} <span className="ml-1">×</span>
-              </button>
-            )}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {filters.category && (
+                <button 
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 hover:bg-blue-200 transition-colors"
+                  onClick={() => setFilters(prev => ({ ...prev, category: '' }))}
+                >
+                  Category: {filters.category}
+                  <X className="h-3 w-3 ml-1" />
+                </button>
+              )}
+              {filters.size && (
+                <button 
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-800 hover:bg-emerald-200 transition-colors"
+                  onClick={() => setFilters(prev => ({ ...prev, size: '' }))}
+                >
+                  Size: {filters.size}
+                  <X className="h-3 w-3 ml-1" />
+                </button>
+              )}
+              {filters.condition && (
+                <button 
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors"
+                  onClick={() => setFilters(prev => ({ ...prev, condition: '' }))}
+                >
+                  Condition: {filters.condition}
+                  <X className="h-3 w-3 ml-1" />
+                </button>
+              )}
+              {filters.color && (
+                <button 
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors"
+                  onClick={() => setFilters(prev => ({ ...prev, color: '' }))}
+                >
+                  Color: {filters.color}
+                  <X className="h-3 w-3 ml-1" />
+                </button>
+              )}
+              {(filters.minPrice || filters.maxPrice) && (
+                <button 
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 hover:bg-purple-200 transition-colors"
+                  onClick={() => setFilters(prev => ({ ...prev, minPrice: '', maxPrice: '' }))}
+                >
+                  Price: ${filters.minPrice || 0} - ${filters.maxPrice || '∞'}
+                  <X className="h-3 w-3 ml-1" />
+                </button>
+              )}
+              {searchTerm && (
+                <button 
+                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800 hover:bg-indigo-200 transition-colors"
+                  onClick={() => setSearchTerm('')}
+                >
+                  Search: "{searchTerm}"
+                  <X className="h-3 w-3 ml-1" />
+                </button>
+              )}
+            </div>
           </div>
         )}
 
         {/* Filter Panel */}
         {showFilters && (
-          <div className="card glass-effect p-6 mb-6 animate-slideInRight">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Filters</h3>
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6 animate-slideInRight">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">Filter Options</h3>
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+                  className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium px-3 py-1 rounded-md hover:bg-blue-50 transition-colors"
                 >
                   <X className="h-4 w-4 mr-1" />
                   Clear All
@@ -226,13 +273,14 @@ const HomePage: React.FC = () => {
               )}
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+              {/* Category Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
                 <select
                   value={filters.category}
                   onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
                 >
                   <option value="">All Categories</option>
                   {categories.map(category => (
@@ -241,12 +289,13 @@ const HomePage: React.FC = () => {
                 </select>
               </div>
               
+              {/* Size Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
                 <select
                   value={filters.size}
                   onChange={(e) => setFilters(prev => ({ ...prev, size: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
                 >
                   <option value="">All Sizes</option>
                   {sizes.map(size => (
@@ -255,12 +304,13 @@ const HomePage: React.FC = () => {
                 </select>
               </div>
               
+              {/* Color Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Color</label>
                 <select
                   value={filters.color}
                   onChange={(e) => setFilters(prev => ({ ...prev, color: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
                 >
                   <option value="">All Colors</option>
                   {colors.map(color => (
@@ -269,12 +319,13 @@ const HomePage: React.FC = () => {
                 </select>
               </div>
               
+              {/* Condition Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Condition</label>
                 <select
                   value={filters.condition}
                   onChange={(e) => setFilters(prev => ({ ...prev, condition: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
                 >
                   <option value="">All Conditions</option>
                   {conditions.map(condition => (
@@ -283,26 +334,36 @@ const HomePage: React.FC = () => {
                 </select>
               </div>
               
+              {/* Min Price Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Min Price</label>
-                <input
-                  type="number"
-                  placeholder="$0"
-                  value={filters.minPrice}
-                  onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={filters.minPrice}
+                    onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-md pl-8 pr-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    min="0"
+                  />
+                </div>
               </div>
               
+              {/* Max Price Filter */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Max Price</label>
-                <input
-                  type="number"
-                  placeholder="$1000"
-                  value={filters.maxPrice}
-                  onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-sm">$</span>
+                  <input
+                    type="number"
+                    placeholder="1000"
+                    value={filters.maxPrice}
+                    onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
+                    className="w-full border border-gray-300 rounded-md pl-8 pr-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    min="0"
+                  />
+                </div>
               </div>
             </div>
           </div>
