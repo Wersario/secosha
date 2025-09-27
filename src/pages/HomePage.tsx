@@ -136,8 +136,8 @@ const HomePage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search Input */}
-            <div className="relative flex-1 flex items-center">
-              <Search className="absolute left-3 text-gray-400 h-4 w-4 pointer-events-none" />
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search for items..."
@@ -151,7 +151,6 @@ const HomePage: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 lg:gap-3">
               {/* Sort Dropdown */}
               <div className="min-w-[180px]">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as 'newest' | 'price_asc' | 'price_desc')}
@@ -164,7 +163,7 @@ const HomePage: React.FC = () => {
               </div>
               
               {/* Filter Toggle Button */}
-              <div className="flex items-end">
+              <div>
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className={`flex items-center px-6 py-2 rounded-lg font-medium transition-all duration-200 whitespace-nowrap h-10 ${
