@@ -35,11 +35,11 @@ const CreateItemPage: React.FC = () => {
       return;
     }
 
-    console.log('Processing', toUpload.length, 'files for base64 conversion');
+    console.log('Processing', toUpload.length, 'files for upload');
     setUploading(true);
     
     try {
-      const base64Images: string[] = [];
+      const processedImages: string[] = [];
       
       for (const file of toUpload) {
         console.log('Processing file:', file.name, 'Size:', file.size, 'Type:', file.type);
@@ -50,19 +50,40 @@ const CreateItemPage: React.FC = () => {
           continue;
         }
 
-        // Validate file size (max 2MB per image)
-        const maxSize = 2 * 1024 * 1024; // 2MB
+        // Validate file size (max 1MB per image for better performance)
+        const maxSize = 1 * 1024 * 1024; // 1MB
         if (file.size > maxSize) {
-          alert(`${file.name} is too large. Please select images smaller than 2MB.`);
+          alert(`${file.name} is too large. Please select images smaller than 1MB.`);
           continue;
         }
 
-        // Convert to base64
+        // Convert to base64 with compression
         const base64 = await new Promise<string>((resolve, reject) => {
           const reader = new FileReader();
           reader.onload = () => {
             if (typeof reader.result === 'string') {
-              resolve(reader.result);
+              // Compress the image by reducing quality
+              const img = new Image();
+              img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Resize image to max 800px width while maintaining aspect ratio
+                const maxWidth = 800;
+                const ratio = Math.min(maxWidth / img.width, maxWidth / img.height);
+                canvas.width = img.width * ratio;
+                canvas.height = img.height * ratio;
+                
+                if (ctx) {
+                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                  // Convert to base64 with 70% quality
+                  const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                  resolve(compressedBase64);
+                } else {
+                  resolve(reader.result);
+                }
+              };
+              img.src = reader.result as string;
             } else {
               reject(new Error('Failed to convert file to base64'));
             }
@@ -71,16 +92,16 @@ const CreateItemPage: React.FC = () => {
           reader.readAsDataURL(file);
         });
 
-        base64Images.push(base64);
-        console.log('Converted to base64:', file.name);
+        processedImages.push(base64);
+        console.log('Converted and compressed:', file.name);
       }
 
-      if (base64Images.length > 0) {
-        setImages(prev => [...prev, ...base64Images].slice(0, 5));
-        console.log('All images processed successfully. Total images:', base64Images.length);
-        alert(`Successfully processed ${base64Images.length} image(s).`);
+      if (processedImages.length > 0) {
+        setImages(prev => [...prev, ...processedImages].slice(0, 5));
+        console.log('All images processed successfully. Total images:', processedImages.length);
+        alert(`Successfully processed ${processedImages.length} image(s).`);
       } else {
-        alert('No valid images were processed. Please select valid image files under 2MB each.');
+        alert('No valid images were processed. Please select valid image files under 1MB each.');
       }
     } catch (err) {
       console.error('Image processing failed:', err);
@@ -118,10 +139,17 @@ const CreateItemPage: React.FC = () => {
       color: formData.color,
       category: formData.category,
       condition: formData.condition,
-      images: images,
+      images_count: images.length,
     });
 
     setLoading(true);
+    
+    // Add timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      alert('Request timed out. Please try again.');
+    }, 30000); // 30 second timeout
+
     try {
       // First, let's test if we can connect to the database
       console.log('Testing database connection...');
@@ -137,25 +165,41 @@ const CreateItemPage: React.FC = () => {
       
       console.log('Database connection successful');
 
+      // Prepare the data for insertion
+      // Use simple placeholder URLs for now to test database insert
+      const placeholderImages = images.length > 0 
+        ? images.map((_, index) => `https://via.placeholder.com/400x300/cccccc/666666?text=Image+${index + 1}`)
+        : ['https://via.placeholder.com/400x300/cccccc/666666?text=No+Image'];
+      
+      const itemData = {
+        user_id: user.id,
+        title: formData.title,
+        description: formData.description,
+        price: parseFloat(formData.price),
+        size: formData.size,
+        color: formData.color,
+        category: formData.category,
+        condition: formData.condition,
+        images: JSON.stringify(placeholderImages), // Store as JSON string
+      };
+
+      console.log('Inserting item with data size:', JSON.stringify(itemData).length, 'characters');
+
       // Now try to insert the item
       console.log('Inserting item...');
       const { data, error } = await supabase
         .from('clothing_items')
-        .insert({
-          user_id: user.id,
-          title: formData.title,
-          description: formData.description,
-          price: parseFloat(formData.price),
-          size: formData.size,
-          color: formData.color,
-          category: formData.category,
-          condition: formData.condition,
-          images: JSON.stringify(images), // Store as JSON string
-        })
+        .insert(itemData)
         .select();
 
       if (error) {
         console.error('Database insert error:', error);
+        console.error('Error details:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         throw new Error(`Database insert failed: ${error.message} (Code: ${error.code})`);
       }
 
@@ -179,6 +223,7 @@ const CreateItemPage: React.FC = () => {
       const message = error instanceof Error ? error.message : 'Failed to create item. Please try again.';
       alert(`Creation failed: ${message}`);
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
