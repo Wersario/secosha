@@ -39,110 +39,125 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-soft overflow-hidden animate-fadeInUp">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-emerald-600 px-8 py-12 text-center">
-            <h1 className="text-3xl font-bold text-white mb-2">Secosha</h1>
-            <p className="text-blue-100">
-              {isSignUp ? 'Create your account' : 'Welcome back!'}
-            </p>
-          </div>
+    <div className="min-h-screen gradient-bg flex flex-col">
+      <div className="flex-1 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-soft overflow-hidden animate-fadeInUp">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-emerald-600 px-8 py-12 text-center">
+              <h1 className="text-3xl font-bold text-white mb-2">Secosha</h1>
+              <p className="text-blue-100">
+                {isSignUp ? 'Create your account' : 'Welcome back!'}
+              </p>
+            </div>
 
-          {/* Form */}
-          <div className="px-8 py-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {isSignUp && (
+            {/* Form */}
+            <div className="px-8 py-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {isSignUp && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Full Name
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                      <input
+                        type="text"
+                        required
+                        value={formData.fullName}
+                        onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                        className="input-field pl-10 pr-4 py-3 focus-ring"
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
+                    Email Address
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <input
-                      type="text"
+                      type="email"
                       required
-                      value={formData.fullName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                       className="input-field pl-10 pr-4 py-3 focus-ring"
-                      placeholder="Enter your full name"
+                      placeholder="Enter your email"
                     />
                   </div>
                 </div>
-              )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="input-field pl-10 pr-4 py-3 focus-ring"
-                    placeholder="Enter your email"
-                  />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={formData.password}
+                      onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                      className="input-field pl-10 pr-12 py-3 focus-ring"
+                      placeholder="Enter your password"
+                      minLength={6}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                  {isSignUp && (
+                    <p className="text-xs text-gray-500 mt-1">Password must be at least 6 characters</p>
+                  )}
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={formData.password}
-                    onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                    className="input-field pl-10 pr-12 py-3 focus-ring"
-                    placeholder="Enter your password"
-                    minLength={6}
-                  />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
+                </button>
+              </form>
+
+              {/* Toggle */}
+              <div className="mt-8 text-center">
+                <p className="text-gray-600">
+                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    onClick={() => setIsSignUp(!isSignUp)}
+                    className="ml-2 text-blue-600 hover:text-blue-800 font-medium"
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    {isSignUp ? 'Sign In' : 'Sign Up'}
                   </button>
-                </div>
-                {isSignUp && (
-                  <p className="text-xs text-gray-500 mt-1">Password must be at least 6 characters</p>
-                )}
+                </p>
               </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
-              </button>
-            </form>
-
-            {/* Toggle */}
-            <div className="mt-8 text-center">
-              <p className="text-gray-600">
-                {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-                <button
-                  type="button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  className="ml-2 text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  {isSignUp ? 'Sign In' : 'Sign Up'}
-                </button>
-              </p>
             </div>
           </div>
         </div>
-
       </div>
+      
+      {/* Footer */}
+      <footer className="bg-black text-white py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-sm text-gray-300">
+              © {new Date().getFullYear()} Secosha. All rights reserved.
+            </p>
+            <p className="text-xs text-gray-400 mt-2">
+              Your trusted marketplace for second-hand fashion
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };
