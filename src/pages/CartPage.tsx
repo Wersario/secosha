@@ -7,9 +7,11 @@ const CartPage: React.FC = () => {
 
   if (items.length === 0) {
     return (
-      <div className="p-6 max-w-3xl mx-auto text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-3">Your Cart</h1>
-        <p className="text-gray-600">Your cart is empty. Start adding items from Browse.</p>
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="p-6 max-w-3xl mx-auto text-center">
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">Your Cart</h1>
+          <p className="text-gray-600">Your cart is empty. Start adding items from Browse.</p>
+        </div>
       </div>
     );
   }

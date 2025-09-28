@@ -16,7 +16,7 @@ const Layout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Desktop Sidebar */}
       <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
         <div className="flex flex-col flex-grow pt-5 overflow-y-auto bg-white shadow-lg">
@@ -78,13 +78,13 @@ const Layout: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="md:pl-64 flex flex-col flex-1">
+      <div className="md:pl-64 flex flex-col flex-1 min-h-screen">
         <main className="flex-1 pb-20 md:pb-0">
           <Outlet />
         </main>
         
         {/* Footer */}
-        <footer className="bg-black text-white py-8 mt-12">
+        <footer className="bg-black text-white py-8 mt-auto">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <p className="text-sm text-gray-300">
